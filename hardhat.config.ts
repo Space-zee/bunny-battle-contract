@@ -39,7 +39,9 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
+      // @ts-ignore
       scrollSepolia: process.env.SCROLL_SCAN,
+      // @ts-ignore
       scroll: process.env.SCROLL_SCAN,
     },
     customChains: [
