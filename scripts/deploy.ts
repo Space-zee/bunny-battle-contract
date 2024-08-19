@@ -1,4 +1,4 @@
-import { ZeroAddress } from "ethers";
+import { Wallet, ZeroAddress } from "ethers";
 
 const { ethers, run } = require("hardhat");
 

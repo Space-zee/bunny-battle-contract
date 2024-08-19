@@ -25,6 +25,12 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 534351
     },
+    scroll: {
+      url:"https://scrollscan.com/",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      chainId: 534352
+    },
     
   },
   gasReporter: {
@@ -34,6 +40,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       scrollSepolia: process.env.SCROLL_SCAN,
+      scroll: process.env.SCROLL_SCAN,
     },
     customChains: [
       {
@@ -42,6 +49,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api-sepolia.scrollscan.com/api',
           browserURL: 'https://sepolia.scrollscan.com/',
+        },
+      },
+      {
+        network: 'scroll',
+        chainId: 534351,
+        urls: {
+          apiURL: 'https://api.scrollscan.com/api',
+          browserURL: 'https://scrollscan.com/',
         },
       },
     ],
