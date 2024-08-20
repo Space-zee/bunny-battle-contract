@@ -24,7 +24,7 @@ async function main() {
 
 function getScrollscanUrl(networkName: string) {
   switch (networkName) {
-    case "scrollMainnet":
+    case "scroll":
       return "https://scrollscan.com";
     case "scrollTestnet":
       return "https://sepolia.scrollscan.com";
@@ -56,18 +56,3 @@ main()
     console.error(error);
     process.exit(1);
   });
-
-//______                          ______       _   _   _
-//| ___ \                         | ___ \     | | | | | |
-//| |_/ /_   _ _ __  _ __  _   _  | |_/ / __ _| |_| |_| | ___
-//| ___ \ | | | '_ \| '_ \| | | | | ___ \/ _` | __| __| |/ _ \
-//| |_/ / |_| | | | | | | | |_| | | |_/ / (_| | |_| |_| |  __/
-//\____/ \__,_|_| |_|_| |_|\__, | \____/ \__,_|\__|\__|_|\___|
-//                          __/ |
-//                          |___/
-//_ _ _ ____ _  _ ___    ___ ____     _ ____ _ _  _    ___ _  _ ____    ___ ____ ____ _  _ __.
-//| | | |__| |\ |  |      |  |  |     | |  | | |\ |     |  |__| |___     |  |___ |__| |\/|  _]
-//|_|_| |  | | \|  |      |  |__|    _| |__| | | \|     |  |  | |___     |  |___ |  | |  |  .
-//
-//
-//Tell us what you’d like to improve → Telegram: @AkstonBunny

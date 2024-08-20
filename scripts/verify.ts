@@ -3,9 +3,9 @@ import { Wallet, ZeroAddress } from "ethers";
 const { ethers, run } = require("hardhat");
 
 async function main() {
-  await verifyContract("0xcee8c1e903d1d40952e86d9ed5779b896c5f52d2",
-    "0x5f4438cf0B4C6c7f40CD5dF95236d973F885Dd78",
-    "0x9B48830B98De9AaBc3bb240DBf41F746896b8fFC");
+  await verifyContract("0x5f08612092e16D67bC17bF7733D512e244007b7e",
+    "0x8EbCE31Fac9714a2Fa2Ce4845D330c95d91DD81A",
+    "0xb73ef72D228F808990CD64A623F2349960d437A1");
 }
 
 function getScrollscanUrl(networkName: string) {

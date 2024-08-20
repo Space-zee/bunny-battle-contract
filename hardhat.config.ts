@@ -29,7 +29,7 @@ const config: HardhatUserConfig = {
       chainId: 534351
     },
     scroll: {
-      url:"https://scrollscan.com/",
+      url: process.env.SCROLL_RPC_URL,
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 534352
