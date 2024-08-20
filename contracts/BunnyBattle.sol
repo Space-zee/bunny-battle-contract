@@ -1,4 +1,22 @@
 //SPDX-License-Identifier: Unlicense
+
+//
+//   ______                          ______       _   _   _
+//   | ___ \                         | ___ \     | | | | | |
+//   | |_/ /_   _ _ __  _ __  _   _  | |_/ / __ _| |_| |_| | ___
+//   | ___ \ | | | '_ \| '_ \| | | | | ___ \/ _` | __| __| |/ _ \
+//   | |_/ / |_| | | | | | | | |_| | | |_/ / (_| | |_| |_| |  __/
+//   \____/ \__,_|_| |_|_| |_|\__, | \____/ \__,_|\__|\__|_|\___|
+//                             __/ |
+//                            |___/
+//   _ _ _ ____ _  _ ___    ___ ____     _ ____ _ _  _    ___ _  _ ____    ___ ____ ____ _  _ __.
+//   | | | |__| |\ |  |      |  |  |     | |  | | |\ |     |  |__| |___     |  |___ |__| |\/|  _]
+//   |_|_| |  | | \|  |      |  |__|    _| |__| | | \|     |  |  | |___     |  |___ |  | |  |  .
+//
+//
+//   Tell us what you’d like to improve → Telegram: @AkstonBunny
+//
+
 pragma solidity ^0.8.24;
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IBunnyBattle } from "./interfaces/IBunnyBattle.sol";

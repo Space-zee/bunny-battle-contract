@@ -18,6 +18,9 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const config: HardhatUserConfig = {
   solidity: "0.8.24",
+  // sourcify: {
+  //   enabled: true
+  // },
   networks: {
     scrollSepolia: {
       url:"https://sepolia-rpc.scroll.io/",
@@ -55,7 +58,7 @@ const config: HardhatUserConfig = {
       },
       {
         network: 'scroll',
-        chainId: 534351,
+        chainId: 534352,
         urls: {
           apiURL: 'https://api.scrollscan.com/api',
           browserURL: 'https://scrollscan.com/',
