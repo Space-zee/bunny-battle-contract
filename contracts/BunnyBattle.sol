@@ -25,7 +25,9 @@ import {IBoardVerifier, IMoveVerifier} from "./interfaces/IProofVerification.sol
 /// @dev BunnyBattle contract that uses zk proof for fair game
 contract BunnyBattle is Ownable, IBunnyBattle {
     /// @dev fee percentage amount that subtract from each game pool prize
-    uint256 public constant feePercentage = 1 ether; // 1 %
+    uint16 private constant FEE_PERCENTAGE = 100; // 100% = 10000 | 1% = 100
+    uint16 private constant BPS = 10000;
+
     /// @dev time that allowed for user to make a move
     uint256 public constant makeMoveTimestamp = 60 seconds;
     /// @dev min bet amount for game deposit
@@ -230,7 +232,7 @@ contract BunnyBattle is Ownable, IBunnyBattle {
             }
         }
 
-        uint256 treasuryFee = g.totalBetAmount * feePercentage / 100 ether;
+        uint256 treasuryFee = g.totalBetAmount * uint256(FEE_PERCENTAGE) / uint256(BPS);
         accumulatedFee += treasuryFee;
         _sendEther(winner, g.totalBetAmount - treasuryFee);
         emit CommissionAccumulated(_gameID, treasuryFee);

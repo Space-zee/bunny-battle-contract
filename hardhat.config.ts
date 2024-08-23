@@ -40,7 +40,7 @@ const config: HardhatUserConfig = {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
     noColors: true,
-    outputFile: 'gas-report.txt'
+    outputFile: 'gas-reports/gas-report.txt'
   },
   etherscan: {
     apiKey: {
