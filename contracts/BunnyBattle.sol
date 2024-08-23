@@ -33,16 +33,18 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     /// @dev min bet amount for game deposit
     uint128 private constant MIN_BET_AMOUNT = 0.001 ether;
 
-    /// @dev proof verifier contracts
-    IBoardVerifier public immutable boardVerifier;
-    IMoveVerifier public immutable moveVerifier;
+    /// @dev accumulated fee from the passed games
+    uint128 private accumulatedFee;
 
     /// @dev id of the next game
-    uint256 public nextGameID;
-    /// @dev accumulated fee from the passed games
-    uint256 public accumulatedFee;
+    uint32 private nextGameID;
+
+    /// @dev proof verifier contracts
+    IBoardVerifier private immutable boardVerifier;
+    IMoveVerifier private immutable moveVerifier;
+
     /// @dev info about games
-    mapping(uint256 => Game) private games;
+    mapping(uint32 => Game) private games;
 
     /// @dev Initialize constructor parameters
     /// @param _boardVerifier verifier contract for board creation proof to start or join
@@ -61,13 +63,16 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     function createGame(bytes calldata _proof, uint256 _boardHash, uint128 _betAmount)
         external
         payable
-        returns (uint256)
+        returns (uint32)
     {
         _requireCreateProof(_proof, _boardHash);
         if (_betAmount < MIN_BET_AMOUNT) revert IncorrectBetAmount();
 
-        uint256 _currentID = nextGameID;
-        nextGameID += 1;
+        uint32 _currentID = nextGameID;
+
+        unchecked {
+            nextGameID += 1;
+        }
 
         Game storage g = games[_currentID];
         g.player1 = msg.sender;
@@ -166,7 +171,7 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     /// If the first player didn't make a first move the second player win
     /// If any of the player miss the move the player with the last turn win
     /// Can't be called if the game was finished natural
-    function claimReward(uint256 _gameID) external {
+    function claimReward(uint32 _gameID) external {
         Game storage g = games[_gameID];
         if (g.nextMoveDeadline > block.timestamp || g.winner != address(0)) revert FailedToClaimReward();
         _claimReward(_gameID, msg.sender);
@@ -212,14 +217,14 @@ contract BunnyBattle is Ownable, IBunnyBattle {
         ) revert InvalidMoveZK();
     }
 
-    function _depositEther(uint256 _gameID) internal {
+    function _depositEther(uint32 _gameID) internal {
         Game storage g = games[_gameID];
         if (msg.value != g.betAmount) revert IncorrectBetAmount();
         g.totalBetAmount += uint128(msg.value);
         emit EtherDeposited(_gameID, msg.sender, msg.value);
     }
 
-    function _claimReward(uint256 _gameID, address winner) internal {
+    function _claimReward(uint32 _gameID, address winner) internal {
         Game storage g = games[_gameID];
         if (g.winner != address(0)) {
             if (winner != g.winner) revert InvalidWinner();
@@ -232,7 +237,7 @@ contract BunnyBattle is Ownable, IBunnyBattle {
             }
         }
 
-        uint256 treasuryFee = g.totalBetAmount * FEE_PERCENTAGE / BPS;
+        uint128 treasuryFee = g.totalBetAmount * FEE_PERCENTAGE / BPS;
         accumulatedFee += treasuryFee;
         _sendEther(winner, g.totalBetAmount - treasuryFee);
         emit CommissionAccumulated(_gameID, treasuryFee);

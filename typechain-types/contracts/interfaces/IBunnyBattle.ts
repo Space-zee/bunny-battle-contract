@@ -259,7 +259,7 @@ export interface IBunnyBattle extends BaseContract {
   >;
 
   filters: {
-    "CommissionAccumulated(uint256,uint256)": TypedContractEvent<
+    "CommissionAccumulated(uint32,uint256)": TypedContractEvent<
       CommissionAccumulatedEvent.InputTuple,
       CommissionAccumulatedEvent.OutputTuple,
       CommissionAccumulatedEvent.OutputObject
@@ -281,7 +281,7 @@ export interface IBunnyBattle extends BaseContract {
       CommissionClaimedEvent.OutputObject
     >;
 
-    "EtherDeposited(uint256,address,uint256)": TypedContractEvent<
+    "EtherDeposited(uint32,address,uint256)": TypedContractEvent<
       EtherDepositedEvent.InputTuple,
       EtherDepositedEvent.OutputTuple,
       EtherDepositedEvent.OutputObject
@@ -292,7 +292,7 @@ export interface IBunnyBattle extends BaseContract {
       EtherDepositedEvent.OutputObject
     >;
 
-    "GameCreated(uint256,address,uint256)": TypedContractEvent<
+    "GameCreated(uint32,address,uint256)": TypedContractEvent<
       GameCreatedEvent.InputTuple,
       GameCreatedEvent.OutputTuple,
       GameCreatedEvent.OutputObject
@@ -303,7 +303,7 @@ export interface IBunnyBattle extends BaseContract {
       GameCreatedEvent.OutputObject
     >;
 
-    "GameFinished(uint256,address,uint256)": TypedContractEvent<
+    "GameFinished(uint32,address,uint256)": TypedContractEvent<
       GameFinishedEvent.InputTuple,
       GameFinishedEvent.OutputTuple,
       GameFinishedEvent.OutputObject
@@ -314,7 +314,7 @@ export interface IBunnyBattle extends BaseContract {
       GameFinishedEvent.OutputObject
     >;
 
-    "GameJoined(uint256,address)": TypedContractEvent<
+    "GameJoined(uint32,address)": TypedContractEvent<
       GameJoinedEvent.InputTuple,
       GameJoinedEvent.OutputTuple,
       GameJoinedEvent.OutputObject
@@ -325,7 +325,7 @@ export interface IBunnyBattle extends BaseContract {
       GameJoinedEvent.OutputObject
     >;
 
-    "MoveSubmitted(uint256,address,uint256,uint256,bool)": TypedContractEvent<
+    "MoveSubmitted(uint32,address,uint256,uint256,bool)": TypedContractEvent<
       MoveSubmittedEvent.InputTuple,
       MoveSubmittedEvent.OutputTuple,
       MoveSubmittedEvent.OutputObject

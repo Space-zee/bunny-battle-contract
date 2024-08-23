@@ -48,13 +48,13 @@ contract IBunnyBattle {
     error TechnicalLose();
     error FailedToClaimReward();
 
-    event GameCreated(uint256 indexed gameId, address creator, uint256 betAmount);
-    event GameJoined(uint256 indexed gameId, address participant);
+    event GameCreated(uint32 indexed gameId, address creator, uint256 betAmount);
+    event GameJoined(uint32 indexed gameId, address participant);
     event MoveSubmitted(
-        uint256 indexed gameId, address participant, uint256 _moveX, uint256 _moveY, bool isPreviousMoveAHit
+        uint32 indexed gameId, address participant, uint256 _moveX, uint256 _moveY, bool isPreviousMoveAHit
     );
-    event GameFinished(uint256 indexed gameId, address winner, uint256 moveSize);
-    event EtherDeposited(uint256 indexed gameId, address participant, uint256 betAmount);
-    event CommissionAccumulated(uint256 indexed gameId, uint256 commission);
+    event GameFinished(uint32 indexed gameId, address winner, uint256 moveSize);
+    event EtherDeposited(uint32 indexed gameId, address participant, uint256 betAmount);
+    event CommissionAccumulated(uint32 indexed gameId, uint256 commission);
     event CommissionClaimed(uint256 accumulatedFee);
 }

@@ -90,9 +90,9 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
+        internalType: "uint32",
         name: "gameId",
-        type: "uint256",
+        type: "uint32",
       },
       {
         indexed: false,
@@ -122,9 +122,9 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
+        internalType: "uint32",
         name: "gameId",
-        type: "uint256",
+        type: "uint32",
       },
       {
         indexed: false,
@@ -147,9 +147,9 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
+        internalType: "uint32",
         name: "gameId",
-        type: "uint256",
+        type: "uint32",
       },
       {
         indexed: false,
@@ -172,9 +172,9 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
+        internalType: "uint32",
         name: "gameId",
-        type: "uint256",
+        type: "uint32",
       },
       {
         indexed: false,
@@ -197,9 +197,9 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
+        internalType: "uint32",
         name: "gameId",
-        type: "uint256",
+        type: "uint32",
       },
       {
         indexed: false,
@@ -216,9 +216,9 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
+        internalType: "uint32",
         name: "gameId",
-        type: "uint256",
+        type: "uint32",
       },
       {
         indexed: false,
@@ -251,7 +251,7 @@ const _abi = [
 ] as const;
 
 const _bytecode =
-  "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea264697066735822122064af7e6f75df1039a77ac07f5b7564af0f17455bcc086c8ad14d5aa3f168abe264736f6c63430008180033";
+  "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212207bc7c4be9b31d5bb9a77d5280ec8fc0e4208d138d64196962821babb4ba59a9264736f6c63430008180033";
 
 type IBunnyBattleConstructorParams =
   | [signer?: Signer]
