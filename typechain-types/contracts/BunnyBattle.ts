@@ -74,8 +74,6 @@ export interface BunnyBattleInterface extends Interface {
       | "createGame"
       | "game"
       | "joinGame"
-      | "makeMoveTimestamp"
-      | "minBetAmount"
       | "moveVerifier"
       | "nextGameID"
       | "owner"
@@ -122,14 +120,6 @@ export interface BunnyBattleInterface extends Interface {
     values: [BigNumberish, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "makeMoveTimestamp",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "minBetAmount",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "moveVerifier",
     values?: undefined
   ): string;
@@ -170,14 +160,6 @@ export interface BunnyBattleInterface extends Interface {
   decodeFunctionResult(functionFragment: "createGame", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "game", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "joinGame", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "makeMoveTimestamp",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "minBetAmount",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "moveVerifier",
     data: BytesLike
@@ -409,10 +391,6 @@ export interface BunnyBattle extends BaseContract {
     "payable"
   >;
 
-  makeMoveTimestamp: TypedContractMethod<[], [bigint], "view">;
-
-  minBetAmount: TypedContractMethod<[], [bigint], "view">;
-
   moveVerifier: TypedContractMethod<[], [string], "view">;
 
   nextGameID: TypedContractMethod<[], [bigint], "view">;
@@ -476,12 +454,6 @@ export interface BunnyBattle extends BaseContract {
     [void],
     "payable"
   >;
-  getFunction(
-    nameOrSignature: "makeMoveTimestamp"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "minBetAmount"
-  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "moveVerifier"
   ): TypedContractMethod<[], [string], "view">;

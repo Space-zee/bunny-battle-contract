@@ -25,13 +25,13 @@ import {IBoardVerifier, IMoveVerifier} from "./interfaces/IProofVerification.sol
 /// @dev BunnyBattle contract that uses zk proof for fair game
 contract BunnyBattle is Ownable, IBunnyBattle {
     /// @dev fee percentage amount that subtract from each game pool prize
-    uint16 private constant FEE_PERCENTAGE = 100; // 100% = 10000 | 1% = 100
-    uint16 private constant BPS = 10000;
+    uint128 private constant FEE_PERCENTAGE = 100; // 100% = 10000 | 1% = 100
+    uint128 private constant BPS = 10000;
 
     /// @dev time that allowed for user to make a move
-    uint256 public constant makeMoveTimestamp = 60 seconds;
+    uint256 private constant MAKE_MOVE_TIMESTAMP = 60 seconds;
     /// @dev min bet amount for game deposit
-    uint256 public constant minBetAmount = 0.001 ether;
+    uint128 private constant MIN_BET_AMOUNT = 0.001 ether;
 
     /// @dev proof verifier contracts
     IBoardVerifier public immutable boardVerifier;
@@ -58,13 +58,13 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     /// @param _betAmount amount of the bet for the current game. Both user should pay this amount to join the game.
     /// The user creates game and sets bet amount.
     /// Emits as {GameCreated} event
-    function createGame(bytes calldata _proof, uint256 _boardHash, uint256 _betAmount)
+    function createGame(bytes calldata _proof, uint256 _boardHash, uint128 _betAmount)
         external
         payable
         returns (uint256)
     {
         _requireCreateProof(_proof, _boardHash);
-        if (_betAmount < minBetAmount) revert IncorrectBetAmount();
+        if (_betAmount < MIN_BET_AMOUNT) revert IncorrectBetAmount();
 
         uint256 _currentID = nextGameID;
         nextGameID += 1;
@@ -99,7 +99,7 @@ contract BunnyBattle is Ownable, IBunnyBattle {
 
         g.player2 = msg.sender;
         g.player2Hash = _boardHash;
-        g.nextMoveDeadline = block.timestamp + makeMoveTimestamp;
+        g.nextMoveDeadline = block.timestamp + MAKE_MOVE_TIMESTAMP;
         emit GameJoined(_gameID, msg.sender);
     }
 
@@ -148,7 +148,7 @@ contract BunnyBattle is Ownable, IBunnyBattle {
 
         g.moves[g.movesSize] = Move({x: _moveX, y: _moveY, isHit: false});
         g.movesSize += 1;
-        g.nextMoveDeadline = block.timestamp + makeMoveTimestamp;
+        g.nextMoveDeadline = block.timestamp + MAKE_MOVE_TIMESTAMP;
         emit MoveSubmitted(_gameID, msg.sender, _moveX, _moveY, isPreviousMoveAHit);
     }
 
@@ -215,7 +215,7 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     function _depositEther(uint256 _gameID) internal {
         Game storage g = games[_gameID];
         if (msg.value != g.betAmount) revert IncorrectBetAmount();
-        g.totalBetAmount += msg.value;
+        g.totalBetAmount += uint128(msg.value);
         emit EtherDeposited(_gameID, msg.sender, msg.value);
     }
 
@@ -232,7 +232,7 @@ contract BunnyBattle is Ownable, IBunnyBattle {
             }
         }
 
-        uint256 treasuryFee = g.totalBetAmount * uint256(FEE_PERCENTAGE) / uint256(BPS);
+        uint256 treasuryFee = g.totalBetAmount * FEE_PERCENTAGE / BPS;
         accumulatedFee += treasuryFee;
         _sendEther(winner, g.totalBetAmount - treasuryFee);
         emit CommissionAccumulated(_gameID, treasuryFee);
