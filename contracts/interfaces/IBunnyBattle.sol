@@ -3,8 +3,8 @@ pragma solidity ^0.8.24;
 
 contract IBunnyBattle {
     struct Move {
-        uint256 x;
-        uint256 y;
+        uint8 x;
+        uint8 y;
         bool isHit;
     }
 
@@ -12,14 +12,13 @@ contract IBunnyBattle {
         address player1;
         address player2;
         address winner;
+        uint8 movesSize;
+        bool isRewardClaimed;
         uint256 player1Hash;
         uint256 player2Hash;
         uint128 betAmount;
         uint128 totalBetAmount;
-        uint256 movesSize;
         uint256 nextMoveDeadline;
-        mapping(uint256 => Move) moves;
-        mapping(address => uint256) totalHits;
     }
 
     struct GamePublicMetadata {
@@ -28,11 +27,12 @@ contract IBunnyBattle {
         address winner;
         uint256 player1Hash;
         uint256 player2Hash;
-        uint256 totalBetAmount;
+        uint128 totalBetAmount;
         uint256 nextMoveDeadline;
         Move[] moves;
     }
 
+    error PlayerTwoNotJoinedYet();
     error InvalidBoardStateZK();
     error InvalidMoveZK();
     error InvalidGameID();
@@ -47,14 +47,15 @@ contract IBunnyBattle {
     error FailedEtherSend();
     error TechnicalLose();
     error FailedToClaimReward();
+    error RewardIsAlreadyClaimed();
 
-    event GameCreated(uint32 indexed gameId, address creator, uint256 betAmount);
+    event GameCreated(uint32 indexed gameId, address creator, uint128 betAmount);
     event GameJoined(uint32 indexed gameId, address participant);
     event MoveSubmitted(
-        uint32 indexed gameId, address participant, uint256 _moveX, uint256 _moveY, bool isPreviousMoveAHit
+        uint32 indexed gameId, address participant, uint8 _moveX, uint8 _moveY, bool isPreviousMoveAHit
     );
-    event GameFinished(uint32 indexed gameId, address winner, uint256 moveSize);
-    event EtherDeposited(uint32 indexed gameId, address participant, uint256 betAmount);
-    event CommissionAccumulated(uint32 indexed gameId, uint256 commission);
-    event CommissionClaimed(uint256 accumulatedFee);
+    event GameFinished(uint32 indexed gameId, address winner, uint8 moveSize);
+    event EtherDeposited(uint32 indexed gameId, address participant, uint128 betAmount);
+    event CommissionAccumulated(uint32 indexed gameId, uint128 commission);
+    event CommissionClaimed(uint128 accumulatedFee);
 }

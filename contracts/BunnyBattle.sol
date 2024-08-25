@@ -46,6 +46,9 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     /// @dev info about games
     mapping(uint32 => Game) private games;
 
+    mapping(uint32 gameID => mapping(uint8 => Move)) private moves;
+    mapping(uint32 gameID => mapping(address player => uint8)) private totalHits;
+
     /// @dev Initialize constructor parameters
     /// @param _boardVerifier verifier contract for board creation proof to start or join
     /// @param _moveVerifier verifier contract for making a move proof
@@ -65,8 +68,10 @@ contract BunnyBattle is Ownable, IBunnyBattle {
         payable
         returns (uint32)
     {
-        _requireCreateProof(_proof, _boardHash);
         if (_betAmount < MIN_BET_AMOUNT) revert IncorrectBetAmount();
+
+        _requireCreateProof(_proof, _boardHash);
+        _validateDeposit(_betAmount);
 
         uint32 _currentID = nextGameID;
 
@@ -74,12 +79,19 @@ contract BunnyBattle is Ownable, IBunnyBattle {
             nextGameID += 1;
         }
 
-        Game storage g = games[_currentID];
-        g.player1 = msg.sender;
-        g.player1Hash = _boardHash;
-        g.movesSize = 0;
-        g.betAmount = _betAmount;
-        _depositEther(_currentID);
+        games[_currentID] = Game({
+            player1: msg.sender,
+            player1Hash: _boardHash,
+            betAmount: _betAmount,
+            totalBetAmount: _betAmount,
+            player2: address(0),
+            player2Hash: 0,
+            winner: address(0),
+            movesSize: 0,
+            isRewardClaimed: false,
+            nextMoveDeadline: 0
+        });
+
         emit GameCreated(_currentID, msg.sender, _betAmount);
 
         return _currentID;
@@ -94,17 +106,22 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     function joinGame(uint32 _gameID, bytes calldata _proof, uint256 _boardHash) external payable {
         if (_gameID >= nextGameID) revert InvalidGameID();
 
-        Game storage g = games[_gameID];
+        Game memory g = games[_gameID];
 
         if (g.player1 == msg.sender) revert NotAllowedJoinGame();
         if (g.player2 != address(0)) revert NotAllowedJoinGame();
 
         _requireCreateProof(_proof, _boardHash);
-        _depositEther(_gameID);
+        _validateDeposit(g.betAmount);
 
-        g.player2 = msg.sender;
-        g.player2Hash = _boardHash;
-        g.nextMoveDeadline = block.timestamp + MAKE_MOVE_TIMESTAMP;
+        games[_gameID].player2 = msg.sender;
+        games[_gameID].player2Hash = _boardHash;
+
+        unchecked {
+            games[_gameID].totalBetAmount += g.betAmount;
+            games[_gameID].nextMoveDeadline = block.timestamp + MAKE_MOVE_TIMESTAMP;
+        }
+
         emit GameJoined(_gameID, msg.sender);
     }
 
@@ -117,53 +134,82 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     /// We check if the user gor 2 hits to detect the winner
     /// User has only 1 minute to make a move otherwise technical lose will appear
     /// Emits as {MoveSubmitted} event and {GameFinished} event
-    function submitMove(uint32 _gameID, uint256 _moveX, uint256 _moveY, bytes calldata _proof, bool isPreviousMoveAHit)
+    function submitMove(uint32 _gameID, uint8 _moveX, uint8 _moveY, bytes calldata _proof, bool isPreviousMoveAHit)
         external
     {
         if (_gameID >= nextGameID) revert InvalidGameID();
-        Game storage g = games[_gameID];
+
+        Game memory g = games[_gameID];
+
+        if (g.player2 == address(0)) revert PlayerTwoNotJoinedYet();
+
+        uint8 movesSize = g.movesSize;
+
         if (g.winner != address(0)) revert GameIsFinished();
         if (g.nextMoveDeadline > 0 && g.nextMoveDeadline < block.timestamp) revert TechnicalLose();
 
-        uint256 _boardHash = g.player1Hash;
-        if (g.movesSize % 2 == 0) {
+        uint256 _boardHash;
+        if (movesSize % 2 == 0) {
             if (msg.sender != g.player1) revert InvalidTurn();
+            _boardHash = g.player1Hash;
         } else {
             if (msg.sender != g.player2) revert InvalidTurn();
             _boardHash = g.player2Hash;
         }
 
-        if (_moveX < 0 && _moveX >= 3) revert InvalidMoveX();
-        if (_moveY < 0 && _moveY >= 3) revert InvalidMoveY();
+        if (_moveX >= 3) revert InvalidMoveX();
+        if (_moveY >= 3) revert InvalidMoveY();
+
+        uint8 playerTotalHits = totalHits[_gameID][msg.sender];
 
         // for the not-first move, ensure the previous guess is marked as hit/no-hit
-        if (g.movesSize > 0) {
-            Move storage previousMove = g.moves[g.movesSize - 1];
+        if (movesSize > 0) {
+            Move memory previousMove = moves[_gameID][movesSize - 1];
             _requireMoveProof(_proof, _boardHash, isPreviousMoveAHit, previousMove.x, previousMove.y);
-            previousMove.isHit = isPreviousMoveAHit;
-            if (isPreviousMoveAHit) g.totalHits[msg.sender]++;
+
+            if (isPreviousMoveAHit) {
+                moves[_gameID][movesSize - 1].isHit = isPreviousMoveAHit;
+
+                unchecked {
+                    ++playerTotalHits;
+                    totalHits[_gameID][msg.sender] = playerTotalHits;
+                }
+            }
         }
 
         // check previous player move
-        if (g.totalHits[msg.sender] == 2) {
-            g.winner = g.movesSize % 2 == 0 ? g.player2 : g.player1;
-            _claimReward(_gameID, g.winner);
-            emit GameFinished(_gameID, g.winner, g.movesSize);
+        if (playerTotalHits == 2) {
+            address winner = movesSize % 2 == 0 ? g.player2 : g.player1;
+            g.winner = winner;
         }
 
-        g.moves[g.movesSize] = Move({x: _moveX, y: _moveY, isHit: false});
-        g.movesSize += 1;
-        g.nextMoveDeadline = block.timestamp + MAKE_MOVE_TIMESTAMP;
+        moves[_gameID][movesSize] = Move({x: _moveX, y: _moveY, isHit: false});
+
+        unchecked {
+            g.movesSize = movesSize + 1;
+            g.nextMoveDeadline = block.timestamp + MAKE_MOVE_TIMESTAMP;
+        }
+
+        games[_gameID] = g;
+
         emit MoveSubmitted(_gameID, msg.sender, _moveX, _moveY, isPreviousMoveAHit);
+
+        if (g.winner != address(0)) {
+            _claimReward(_gameID, g.totalBetAmount, g.winner);
+            emit GameFinished(_gameID, g.winner, movesSize);
+        }
     }
 
     /// @dev Claim commission accumulated on the contract
     /// Only owner can call the function
     /// Emits as {CommissionClaimed} event
     function claimCommission() external onlyOwner {
-        uint256 fee = accumulatedFee;
+        uint128 fee = accumulatedFee;
         if (fee == 0) revert NothingToClaim();
         _sendEther(msg.sender, fee);
+        unchecked {
+            accumulatedFee = 0;
+        }
         emit CommissionClaimed(fee);
     }
 
@@ -171,22 +217,32 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     /// If the first player didn't make a first move the second player win
     /// If any of the player miss the move the player with the last turn win
     /// Can't be called if the game was finished natural
-    function claimReward(uint32 _gameID) external {
-        Game storage g = games[_gameID];
-        if (g.nextMoveDeadline > block.timestamp || g.winner != address(0)) revert FailedToClaimReward();
-        _claimReward(_gameID, msg.sender);
-        g.winner = msg.sender;
+    function claimRewardOnOpponentTimeout(uint32 _gameID) external {
+        Game memory g = games[_gameID];
+
+        if (g.winner != address(0) || g.isRewardClaimed || g.nextMoveDeadline > block.timestamp) {
+            revert FailedToClaimReward();
+        }
+
+        address timeoutWinner = g.movesSize % 2 == 0 ? g.player2 : g.player1;
+
+        if (msg.sender != timeoutWinner) {
+            revert InvalidWinner();
+        }
+
+        games[_gameID].winner = timeoutWinner;
+        _claimReward(_gameID, g.totalBetAmount, timeoutWinner);
     }
 
     /// @dev Return metadata of the game
     /// @param _gameID id of the game required
     function game(uint32 _gameID) external view returns (GamePublicMetadata memory) {
         if (_gameID >= nextGameID) revert InvalidGameID();
-        Game storage g = games[_gameID];
+        Game memory g = games[_gameID];
 
         Move[] memory _moves = new Move[](g.movesSize);
-        for (uint256 i = 0; i < g.movesSize; i++) {
-            _moves[i] = g.moves[i];
+        for (uint8 i = 0; i < g.movesSize; i++) {
+            _moves[i] = moves[_gameID][i];
         }
 
         return GamePublicMetadata({
@@ -217,34 +273,38 @@ contract BunnyBattle is Ownable, IBunnyBattle {
         ) revert InvalidMoveZK();
     }
 
-    function _depositEther(uint32 _gameID) internal {
-        Game storage g = games[_gameID];
-        if (msg.value != g.betAmount) revert IncorrectBetAmount();
-        g.totalBetAmount += uint128(msg.value);
-        emit EtherDeposited(_gameID, msg.sender, msg.value);
+    function _validateDeposit(uint128 _betAmount) private {
+        if (msg.value != _betAmount) revert IncorrectBetAmount();
     }
 
-    function _claimReward(uint32 _gameID, address winner) internal {
-        Game storage g = games[_gameID];
-        if (g.winner != address(0)) {
-            if (winner != g.winner) revert InvalidWinner();
-        } else if (g.nextMoveDeadline < block.timestamp) {
-            // get player who did last move
-            if (g.movesSize % 2 == 0) {
-                if (winner != g.player2) revert InvalidWinner();
-            } else {
-                if (winner != g.player1) revert InvalidWinner();
-            }
+    function _calculateReward(uint128 totalBetAmount)
+        internal
+        pure
+        returns (uint128 winnerReward, uint128 treasuryFee)
+    {
+        treasuryFee = totalBetAmount * FEE_PERCENTAGE / BPS;
+        winnerReward = totalBetAmount - treasuryFee;
+    }
+
+    function _claimReward(uint32 _gameID, uint128 totalBetAmount, address winner) internal {
+        (uint128 winnerReward, uint128 treasuryFee) = _calculateReward(totalBetAmount);
+
+        unchecked {
+            accumulatedFee += treasuryFee;
         }
 
-        uint128 treasuryFee = g.totalBetAmount * FEE_PERCENTAGE / BPS;
-        accumulatedFee += treasuryFee;
-        _sendEther(winner, g.totalBetAmount - treasuryFee);
+        games[_gameID].isRewardClaimed = true;
+
+        _sendEther(winner, winnerReward);
         emit CommissionAccumulated(_gameID, treasuryFee);
     }
 
     function _sendEther(address account, uint256 amount) private {
         (bool success,) = account.call{value: amount}("");
         if (!success) revert FailedEtherSend();
+    }
+
+    function getAccumulatedFee() external view returns (uint128) {
+        return accumulatedFee;
     }
 }

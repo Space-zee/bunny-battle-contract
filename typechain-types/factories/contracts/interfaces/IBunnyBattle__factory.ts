@@ -82,6 +82,16 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "PlayerTwoNotJoinedYet",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "RewardIsAlreadyClaimed",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "TechnicalLose",
     type: "error",
   },
@@ -96,9 +106,9 @@ const _abi = [
       },
       {
         indexed: false,
-        internalType: "uint256",
+        internalType: "uint128",
         name: "commission",
-        type: "uint256",
+        type: "uint128",
       },
     ],
     name: "CommissionAccumulated",
@@ -109,9 +119,9 @@ const _abi = [
     inputs: [
       {
         indexed: false,
-        internalType: "uint256",
+        internalType: "uint128",
         name: "accumulatedFee",
-        type: "uint256",
+        type: "uint128",
       },
     ],
     name: "CommissionClaimed",
@@ -134,9 +144,9 @@ const _abi = [
       },
       {
         indexed: false,
-        internalType: "uint256",
+        internalType: "uint128",
         name: "betAmount",
-        type: "uint256",
+        type: "uint128",
       },
     ],
     name: "EtherDeposited",
@@ -159,9 +169,9 @@ const _abi = [
       },
       {
         indexed: false,
-        internalType: "uint256",
+        internalType: "uint128",
         name: "betAmount",
-        type: "uint256",
+        type: "uint128",
       },
     ],
     name: "GameCreated",
@@ -184,9 +194,9 @@ const _abi = [
       },
       {
         indexed: false,
-        internalType: "uint256",
+        internalType: "uint8",
         name: "moveSize",
-        type: "uint256",
+        type: "uint8",
       },
     ],
     name: "GameFinished",
@@ -228,15 +238,15 @@ const _abi = [
       },
       {
         indexed: false,
-        internalType: "uint256",
+        internalType: "uint8",
         name: "_moveX",
-        type: "uint256",
+        type: "uint8",
       },
       {
         indexed: false,
-        internalType: "uint256",
+        internalType: "uint8",
         name: "_moveY",
-        type: "uint256",
+        type: "uint8",
       },
       {
         indexed: false,
@@ -251,7 +261,7 @@ const _abi = [
 ] as const;
 
 const _bytecode =
-  "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212207bc7c4be9b31d5bb9a77d5280ec8fc0e4208d138d64196962821babb4ba59a9264736f6c63430008180033";
+  "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220f6b88464dca42c482225db6f2caf3823cb6f3221d3a567e84c40a0d81011c0f664736f6c63430008180033";
 
 type IBunnyBattleConstructorParams =
   | [signer?: Signer]
