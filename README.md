@@ -1,6 +1,5 @@
-# Sample Hardhat Project
-
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+# BunnBattle
+BunnBattle integrates zk-SNARKs to create a secure and fair version of the classic Battleship game. The project involves writing smart contracts in Solidity and using libraries like Circom and Snarkjs to implement the zk-SNARK logic. The project aims to demonstrate how zk-SNARKs can be used to ensure fairness and privacy in a decentralized environment and PvP games.
 
 Try running some of the following tasks:
 
