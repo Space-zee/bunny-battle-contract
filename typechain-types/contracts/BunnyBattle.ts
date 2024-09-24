@@ -67,18 +67,12 @@ export declare namespace IBunnyBattle {
 export interface BunnyBattleInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "accumulatedFee"
-      | "boardVerifier"
       | "claimCommission"
-      | "claimReward"
+      | "claimRewardOnOpponentTimeout"
       | "createGame"
-      | "feePercentage"
       | "game"
+      | "getAccumulatedFee"
       | "joinGame"
-      | "makeMoveTimestamp"
-      | "minBetAmount"
-      | "moveVerifier"
-      | "nextGameID"
       | "owner"
       | "renounceOwnership"
       | "submitMove"
@@ -98,49 +92,25 @@ export interface BunnyBattleInterface extends Interface {
   ): EventFragment;
 
   encodeFunctionData(
-    functionFragment: "accumulatedFee",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "boardVerifier",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "claimCommission",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "claimReward",
+    functionFragment: "claimRewardOnOpponentTimeout",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "createGame",
     values: [BytesLike, BigNumberish, BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "game", values: [BigNumberish]): string;
   encodeFunctionData(
-    functionFragment: "feePercentage",
+    functionFragment: "getAccumulatedFee",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "game", values: [BigNumberish]): string;
   encodeFunctionData(
     functionFragment: "joinGame",
     values: [BigNumberish, BytesLike, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "makeMoveTimestamp",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "minBetAmount",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "moveVerifier",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "nextGameID",
-    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -157,41 +127,20 @@ export interface BunnyBattleInterface extends Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "accumulatedFee",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "boardVerifier",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "claimCommission",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "claimReward",
+    functionFragment: "claimRewardOnOpponentTimeout",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "createGame", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "feePercentage",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "game", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getAccumulatedFee",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "joinGame", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "makeMoveTimestamp",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "minBetAmount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "moveVerifier",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "nextGameID", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
@@ -388,13 +337,9 @@ export interface BunnyBattle extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  accumulatedFee: TypedContractMethod<[], [bigint], "view">;
-
-  boardVerifier: TypedContractMethod<[], [string], "view">;
-
   claimCommission: TypedContractMethod<[], [void], "nonpayable">;
 
-  claimReward: TypedContractMethod<
+  claimRewardOnOpponentTimeout: TypedContractMethod<
     [_gameID: BigNumberish],
     [void],
     "nonpayable"
@@ -406,27 +351,19 @@ export interface BunnyBattle extends BaseContract {
     "payable"
   >;
 
-  feePercentage: TypedContractMethod<[], [bigint], "view">;
-
   game: TypedContractMethod<
     [_gameID: BigNumberish],
     [IBunnyBattle.GamePublicMetadataStructOutput],
     "view"
   >;
 
+  getAccumulatedFee: TypedContractMethod<[], [bigint], "view">;
+
   joinGame: TypedContractMethod<
     [_gameID: BigNumberish, _proof: BytesLike, _boardHash: BigNumberish],
     [void],
     "payable"
   >;
-
-  makeMoveTimestamp: TypedContractMethod<[], [bigint], "view">;
-
-  minBetAmount: TypedContractMethod<[], [bigint], "view">;
-
-  moveVerifier: TypedContractMethod<[], [string], "view">;
-
-  nextGameID: TypedContractMethod<[], [bigint], "view">;
 
   owner: TypedContractMethod<[], [string], "view">;
 
@@ -455,16 +392,10 @@ export interface BunnyBattle extends BaseContract {
   ): T;
 
   getFunction(
-    nameOrSignature: "accumulatedFee"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "boardVerifier"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
     nameOrSignature: "claimCommission"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "claimReward"
+    nameOrSignature: "claimRewardOnOpponentTimeout"
   ): TypedContractMethod<[_gameID: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "createGame"
@@ -474,9 +405,6 @@ export interface BunnyBattle extends BaseContract {
     "payable"
   >;
   getFunction(
-    nameOrSignature: "feePercentage"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
     nameOrSignature: "game"
   ): TypedContractMethod<
     [_gameID: BigNumberish],
@@ -484,24 +412,15 @@ export interface BunnyBattle extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "getAccumulatedFee"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "joinGame"
   ): TypedContractMethod<
     [_gameID: BigNumberish, _proof: BytesLike, _boardHash: BigNumberish],
     [void],
     "payable"
   >;
-  getFunction(
-    nameOrSignature: "makeMoveTimestamp"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "minBetAmount"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "moveVerifier"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "nextGameID"
-  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
@@ -583,7 +502,7 @@ export interface BunnyBattle extends BaseContract {
   >;
 
   filters: {
-    "CommissionAccumulated(uint256,uint256)": TypedContractEvent<
+    "CommissionAccumulated(uint32,uint128)": TypedContractEvent<
       CommissionAccumulatedEvent.InputTuple,
       CommissionAccumulatedEvent.OutputTuple,
       CommissionAccumulatedEvent.OutputObject
@@ -594,7 +513,7 @@ export interface BunnyBattle extends BaseContract {
       CommissionAccumulatedEvent.OutputObject
     >;
 
-    "CommissionClaimed(uint256)": TypedContractEvent<
+    "CommissionClaimed(uint128)": TypedContractEvent<
       CommissionClaimedEvent.InputTuple,
       CommissionClaimedEvent.OutputTuple,
       CommissionClaimedEvent.OutputObject
@@ -605,7 +524,7 @@ export interface BunnyBattle extends BaseContract {
       CommissionClaimedEvent.OutputObject
     >;
 
-    "EtherDeposited(uint256,address,uint256)": TypedContractEvent<
+    "EtherDeposited(uint32,address,uint128)": TypedContractEvent<
       EtherDepositedEvent.InputTuple,
       EtherDepositedEvent.OutputTuple,
       EtherDepositedEvent.OutputObject
@@ -616,7 +535,7 @@ export interface BunnyBattle extends BaseContract {
       EtherDepositedEvent.OutputObject
     >;
 
-    "GameCreated(uint256,address,uint256)": TypedContractEvent<
+    "GameCreated(uint32,address,uint128)": TypedContractEvent<
       GameCreatedEvent.InputTuple,
       GameCreatedEvent.OutputTuple,
       GameCreatedEvent.OutputObject
@@ -627,7 +546,7 @@ export interface BunnyBattle extends BaseContract {
       GameCreatedEvent.OutputObject
     >;
 
-    "GameFinished(uint256,address,uint256)": TypedContractEvent<
+    "GameFinished(uint32,address,uint8)": TypedContractEvent<
       GameFinishedEvent.InputTuple,
       GameFinishedEvent.OutputTuple,
       GameFinishedEvent.OutputObject
@@ -638,7 +557,7 @@ export interface BunnyBattle extends BaseContract {
       GameFinishedEvent.OutputObject
     >;
 
-    "GameJoined(uint256,address)": TypedContractEvent<
+    "GameJoined(uint32,address)": TypedContractEvent<
       GameJoinedEvent.InputTuple,
       GameJoinedEvent.OutputTuple,
       GameJoinedEvent.OutputObject
@@ -649,7 +568,7 @@ export interface BunnyBattle extends BaseContract {
       GameJoinedEvent.OutputObject
     >;
 
-    "MoveSubmitted(uint256,address,uint256,uint256,bool)": TypedContractEvent<
+    "MoveSubmitted(uint32,address,uint8,uint8,bool)": TypedContractEvent<
       MoveSubmittedEvent.InputTuple,
       MoveSubmittedEvent.OutputTuple,
       MoveSubmittedEvent.OutputObject

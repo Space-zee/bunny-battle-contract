@@ -123,6 +123,13 @@ describe("Bunnies Battle", function () {
     expect(await ethers.provider.getBalance(bunnyBattle.getAddress())).to.be.eq(parseEther("2"))
   })
 
+  it("Should not make move before second player joins", async function() {
+    const proof1 = await genBoardProof(player1Create);
+    await bunnyBattle.connect(account1).createGame(proof1.solidityProof, proof1.inputs[0], parseEther("1"), { value: parseEther("1") });
+
+    expect(bunnyBattle.connect(account1).submitMove(0, 1, 2, emptyProof, false)).to.be.revertedWithCustomError(bunnyBattle, "PlayerTwoNotJoinedYet");
+  })
+
   it("Should detect winner correct and claim commission", async function () {
     const proof1 = await genBoardProof(player1Create);
     await bunnyBattle.connect(account1).createGame(proof1.solidityProof, proof1.inputs[0], parseEther("1"), { value: parseEther("1") });
@@ -207,10 +214,12 @@ describe("Bunnies Battle", function () {
     expect(game.winner).to.equal(account2);
     const commission =  parseEther("2") *  parseEther("1") /  parseEther("100");
     expect(await ethers.provider.getBalance(account2.address)).to.be.eq(prevBalanceAccount2 + parseEther("2") - commission)
-    expect(await bunnyBattle.accumulatedFee()).to.be.eq(commission)
+    expect(await bunnyBattle.getAccumulatedFee()).to.be.eq(commission)
     const prevBalanceOwner = await ethers.provider.getBalance(owner.address)
     const tx = await bunnyBattle.connect(owner).claimCommission();
     const receipt: ContractTransactionReceipt = await tx.wait() as ContractTransactionReceipt;
+    // revert if no commision left
+    expect(bunnyBattle.connect(owner).claimCommission()).to.be.rejectedWith("NothingToClaim");
     const gasCostForTxn = receipt.gasUsed * receipt.gasPrice
     expect(await ethers.provider.getBalance(bunnyBattle.getAddress())).to.be.eq("0");
     expect(await ethers.provider.getBalance(owner.address)).to.be.eq(prevBalanceOwner + commission - gasCostForTxn);
@@ -296,15 +305,13 @@ describe("Bunnies Battle", function () {
     game = await bunnyBattle.game(0);
     expect(game.winner).to.eq(ZeroAddress);
     
-    // check claimReward
-
     expect(game.winner).to.equal(ZeroAddress);
 
     // revert claim for non-winner 
-    await expect(bunnyBattle.connect(account2).claimReward(0)).to.be.rejectedWith("InvalidWinner");
+    await expect(bunnyBattle.connect(account2).claimRewardOnOpponentTimeout(0)).to.be.rejectedWith("InvalidWinner");
 
     const prevBalanceAccount2 = await ethers.provider.getBalance(account1.address);
-    const tx = await bunnyBattle.connect(account1).claimReward(0);
+    const tx = await bunnyBattle.connect(account1).claimRewardOnOpponentTimeout(0);
 
     const receipt: ContractTransactionReceipt = await tx.wait() as ContractTransactionReceipt;
     const gasCostForTxn = receipt.gasUsed * receipt.gasPrice
@@ -323,22 +330,22 @@ describe("Bunnies Battle", function () {
     const proof2 = await genBoardProof(player2Create);
     await bunnyBattle.connect(account2).joinGame(0, proof2.solidityProof, proof2.inputs[0],  { value: parseEther("1") });
     
-    await expect(bunnyBattle.connect(account1).claimReward(0)).to.be.rejectedWith("FailedToClaimReward");
-    await expect(bunnyBattle.connect(account2).claimReward(0)).to.be.rejectedWith("FailedToClaimReward");
+    await expect(bunnyBattle.connect(account1).claimRewardOnOpponentTimeout(0)).to.be.rejectedWith("FailedToClaimReward");
+    await expect(bunnyBattle.connect(account2).claimRewardOnOpponentTimeout(0)).to.be.rejectedWith("FailedToClaimReward");
 
     // Move time forward by 1 min (55 seconds)
     await ethers.provider.send("evm_increaseTime", [55]);
     await ethers.provider.send("evm_mine", []);
 
-    await expect(bunnyBattle.connect(account1).claimReward(0)).to.be.rejectedWith("FailedToClaimReward");
-    await expect(bunnyBattle.connect(account2).claimReward(0)).to.be.rejectedWith("FailedToClaimReward");
+    await expect(bunnyBattle.connect(account1).claimRewardOnOpponentTimeout(0)).to.be.rejectedWith("FailedToClaimReward");
+    await expect(bunnyBattle.connect(account2).claimRewardOnOpponentTimeout(0)).to.be.rejectedWith("FailedToClaimReward");
 
     // Move time to be > 1 min since start (+5 sec) 
     await ethers.provider.send("evm_increaseTime", [5]);
     await ethers.provider.send("evm_mine", []);
 
-    await expect(bunnyBattle.connect(account1).claimReward(0)).to.be.rejectedWith("InvalidWinner");
-    await bunnyBattle.connect(account2).claimReward(0);
+    await expect(bunnyBattle.connect(account1).claimRewardOnOpponentTimeout(0)).to.be.rejectedWith("InvalidWinner");
+    await bunnyBattle.connect(account2).claimRewardOnOpponentTimeout(0);
 
     game = await bunnyBattle.game(0);
     // check the winner
@@ -361,16 +368,16 @@ describe("Bunnies Battle", function () {
     await ethers.provider.send("evm_increaseTime", [55]);
     await ethers.provider.send("evm_mine", []);
 
-    await expect(bunnyBattle.connect(account1).claimReward(0)).to.be.rejectedWith("FailedToClaimReward");
-    await expect(bunnyBattle.connect(account2).claimReward(0)).to.be.rejectedWith("FailedToClaimReward");
+    await expect(bunnyBattle.connect(account1).claimRewardOnOpponentTimeout(0)).to.be.rejectedWith("FailedToClaimReward");
+    await expect(bunnyBattle.connect(account2).claimRewardOnOpponentTimeout(0)).to.be.rejectedWith("FailedToClaimReward");
 
     // Move time to be > 1 min since start (+5 sec) 
     await ethers.provider.send("evm_increaseTime", [5]);
     await ethers.provider.send("evm_mine", []);
 
-    await expect(bunnyBattle.connect(account2).claimReward(0)).to.be.rejectedWith("InvalidWinner");
+    await expect(bunnyBattle.connect(account2).claimRewardOnOpponentTimeout(0)).to.be.rejectedWith("InvalidWinner");
     
-    await bunnyBattle.connect(account1).claimReward(0);
+    await bunnyBattle.connect(account1).claimRewardOnOpponentTimeout(0);
     game = await bunnyBattle.game(0);
     // check the winner
     expect(game.winner).to.equal(account1);
