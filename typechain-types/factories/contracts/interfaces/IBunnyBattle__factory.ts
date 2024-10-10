@@ -47,6 +47,11 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "InvalidMoveDuplicate",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "InvalidMoveX",
     type: "error",
   },
@@ -261,7 +266,7 @@ const _abi = [
 ] as const;
 
 const _bytecode =
-  "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220f6b88464dca42c482225db6f2caf3823cb6f3221d3a567e84c40a0d81011c0f664736f6c63430008180033";
+  "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212205a2989e7cd54b585cf648d8f3355eea70de0ec33005d8c6aa492e977e29207ef64736f6c63430008180033";
 
 type IBunnyBattleConstructorParams =
   | [signer?: Signer]

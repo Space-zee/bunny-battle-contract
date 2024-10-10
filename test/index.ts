@@ -12,7 +12,7 @@ interface CreateGameArgs {
   player1: HardhatEthersSigner,
   player2: HardhatEthersSigner,
   betAmountInEth: number
-  gameId: number // current (next) game id 
+  gameId: number // current (next) game id
 }
 
 interface Move {
@@ -102,6 +102,15 @@ describe("BunnyBattle", async () => {
     }
 
     const moveCoordinates = getMoveCoordinates()
+    // function findCoordinate(coordinate: Coordinates): Coordinates | undefined {
+    //   return moves.find(coord => coord[0] === coordinate[0] && coord[1] === coordinate[1]);
+    // }
+    // while (findCoordinate(moveCoordinates)) {
+    //   console.log(args.makeHit)
+    //   console.log(getMoveCoordinates())
+    // }
+    // console.log(moveCoordinates)
+    // console.log(moves)
 
     if (!moves.length) {
       await bunnyBattle.connect(currentPlayer).submitMove(args.gameId, moveCoordinates[0], moveCoordinates[1], EmptyProof, false);
@@ -469,7 +478,7 @@ describe("BunnyBattle", async () => {
 
       await expect(bunnyBattle.connect(gamePlayers[0]).submitMove(gameId, wrongMove2Coordinates[0], wrongMove2Coordinates[1], wrongMove2Proof.solidityProof, false)).to.be.revertedWithCustomError(bunnyBattle, 'InvalidTurn')
     })
-    it('should revert when player have not joined game', async () => { 
+    it('should revert when player have not joined game', async () => {
       let gameId = 0;
       const gamePlayers: [HardhatEthersSigner, HardhatEthersSigner] = [players[0], players[1]];
       await createGame({ player1: gamePlayers[0], player2: gamePlayers[1], gameId, betAmountInEth: generateBetAmount() });
@@ -492,7 +501,7 @@ describe("BunnyBattle", async () => {
       await expect(bunnyBattle.connect(gamePlayers[0]).submitMove(gameId, moveCoordinates[0], moveCoordinates[1], EmptyProof, false))
         .to.be.revertedWithCustomError(bunnyBattle, 'PlayerTwoNotJoinedYet');
     })
-    it('should revert when move has x or y bigger than 2', async () => { 
+    it('should revert when move has x or y bigger than 2', async () => {
       const gameId = 0;
       const gamePlayers: [HardhatEthersSigner, HardhatEthersSigner] = [players[0], players[1]];
       const { player1Create, player2Create } = await createGame({ player1: gamePlayers[0], player2: gamePlayers[1], gameId, betAmountInEth: generateBetAmount() });
@@ -518,7 +527,7 @@ describe("BunnyBattle", async () => {
         bunnyBattle.connect(gamePlayers[0]).submitMove(gameId, 2, 2, EmptyProof, false)
       ).to.not.be.reverted;
     })
-    it('should revert when user has already made the same move', async () => { 
+    it('should revert when user has already made the same move', async () => {
       const gameId = 0;
       const gamePlayers: [HardhatEthersSigner, HardhatEthersSigner] = [players[0], players[1]];
       const { player1Create, player2Create, game } = await createGame({ player1: gamePlayers[0], player2: gamePlayers[1], gameId, betAmountInEth: generateBetAmount() });
@@ -543,7 +552,7 @@ describe("BunnyBattle", async () => {
       // await bunnyBattle.connect(gamePlayers[0]).submitMove(gameId, initialMove[0], initialMove[1], move3Proof.solidityProof, false)
 
       const makeSameHitMoves = async () => {
-        // player2 move, hit 
+        // player2 move, hit
         const {move: move4Coordinates} = await submitMove({ players: gamePlayers, playersCreate, gameId, makeHit: true });
 
         // player1 move, miss
@@ -566,10 +575,10 @@ describe("BunnyBattle", async () => {
         const gameData = await bunnyBattle.game(gameId);
         expect(gameData.winner).to.equal(gamePlayers[0].address);
       }
-`      // await makeSameHitMoves()`
+      `      // await makeSameHitMoves()`
       await expect(makeSameHitMoves()).to.be.reverted;
     })
-    it('should revert when move after deadline', async () => { 
+    it('should revert when move after deadline', async () => {
       const gameId = 0;
       const gamePlayers: [HardhatEthersSigner, HardhatEthersSigner] = [players[0], players[1]];
       const { player1Create, player2Create } = await createGame({ player1: gamePlayers[0], player2: gamePlayers[1], gameId, betAmountInEth: generateBetAmount() });
@@ -587,13 +596,13 @@ describe("BunnyBattle", async () => {
     })
   })
   describe('claimCommission()', async () => {
-    it('should claim 0 when no commission accumulated', async () => {       
+    it('should claim 0 when no commission accumulated', async () => {
       const accumulatedFee = await bunnyBattle.getAccumulatedFee();
       expect(accumulatedFee).to.equal(0);
 
       await expect(bunnyBattle.connect(owner).claimCommission()).to.be.revertedWithCustomError(bunnyBattle, 'NothingToClaim');
     })
-    it('should claim correct amount and reset variable', async () => { 
+    it('should claim correct amount and reset variable', async () => {
       const gameId = 0;
       const betAmount = generateBetAmount();
 
@@ -604,7 +613,7 @@ describe("BunnyBattle", async () => {
 
       const accumulatedFee = await bunnyBattle.getAccumulatedFee();
       expect(accumulatedFee).to.equal(calculateProtocolFee(betAmount));
-      
+
       const ownerBalanceBeforeClaim = await getBalance(owner.address);
       await bunnyBattle.connect(owner).claimCommission();
       const ownerBalanceAfterClaim = await getBalance(owner.address);
@@ -616,23 +625,23 @@ describe("BunnyBattle", async () => {
       const gameId = 0;
       const betAmount = generateBetAmount();
       const gamePlayers: [HardhatEthersSigner, HardhatEthersSigner] = [players[0], players[1]];
-      
+
       await playWinGame(gameId, gamePlayers, betAmount);
 
       const accumulatedFee = await bunnyBattle.getAccumulatedFee();
       expect(accumulatedFee).to.equal(calculateProtocolFee(betAmount));
-      
+
       await expect(bunnyBattle.connect(players[0]).claimCommission())
         .to.be.revertedWithCustomError(bunnyBattle, 'OwnableUnauthorizedAccount')
         .withArgs(players[0].address);
     })
   })
   describe('claimRewardOnOpponentTimeout()', async () => {
-    it('should revert when there game doesn\'t exist', async () => { 
+    it('should revert when there game doesn\'t exist', async () => {
       const gameId = 0;
       await expect(bunnyBattle.connect(players[0]).claimRewardOnOpponentTimeout(gameId)).to.be.reverted;
     })
-    it('should revert when there moveDeadline is not yet reached', async () => { 
+    it('should revert when there moveDeadline is not yet reached', async () => {
       const gameId = 0;
       const gamePlayers: [HardhatEthersSigner, HardhatEthersSigner] = [players[0], players[1]];
       const { player1Create, player2Create } = await createGame({ player1: gamePlayers[0], player2: gamePlayers[1], gameId, betAmountInEth: generateBetAmount() });
@@ -649,7 +658,7 @@ describe("BunnyBattle", async () => {
 
       await expect(bunnyBattle.connect(players[1]).claimRewardOnOpponentTimeout(gameId)).to.not.be.reverted;
     })
-    it('should revert when game ended', async () => { 
+    it('should revert when game ended', async () => {
       const gameId = 0;
       const gamePlayers: [HardhatEthersSigner, HardhatEthersSigner] = [players[0], players[1]];
       const betAmount = generateBetAmount();
@@ -658,8 +667,8 @@ describe("BunnyBattle", async () => {
 
       await expect(bunnyBattle.connect(players[0]).claimRewardOnOpponentTimeout(gameId)).to.be.revertedWithCustomError(bunnyBattle, 'FailedToClaimReward');
       await expect(bunnyBattle.connect(players[1]).claimRewardOnOpponentTimeout(gameId)).to.be.revertedWithCustomError(bunnyBattle, 'FailedToClaimReward');
-     })
-    it('should send winner reward', async () => { 
+    })
+    it('should send winner reward', async () => {
       const gameId = 0;
       const gamePlayers: [HardhatEthersSigner, HardhatEthersSigner] = [players[0], players[1]];
       const gamePlayersInitialBalance = [await getBalance(gamePlayers[0].address), await getBalance(gamePlayers[1].address)];
@@ -689,10 +698,10 @@ describe("BunnyBattle", async () => {
 
       // [Fail] can not claim reward second time
       await expect(bunnyBattle.connect(gamePlayers[1]).claimRewardOnOpponentTimeout(gameId)).to.be.revertedWithCustomError(bunnyBattle, 'FailedToClaimReward');
-     })
+    })
   })
   describe('game()', async () => {
-    it('should return correct data for game', async () => { 
+    it('should return correct data for game', async () => {
       const gameId = 0;
       const betAmount = generateBetAmount();
       const betAmountInWei = parseEther(betAmount.toString());
