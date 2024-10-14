@@ -48,6 +48,7 @@ contract IBunnyBattle {
     error TechnicalLose();
     error FailedToClaimReward();
     error RewardIsAlreadyClaimed();
+    error InvalidMoveDuplicate();
 
     event GameCreated(uint32 indexed gameId, address creator, uint128 betAmount);
     event GameJoined(uint32 indexed gameId, address participant);

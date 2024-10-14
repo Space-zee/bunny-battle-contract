@@ -48,6 +48,7 @@ contract BunnyBattle is Ownable, IBunnyBattle {
 
     mapping(uint32 gameID => mapping(uint8 => Move)) private moves;
     mapping(uint32 gameID => mapping(address player => uint8)) private totalHits;
+    mapping(uint32 gameID => mapping(address => mapping(uint8 moveX => mapping(uint8 moveY => bool)))) private movesCoordinates;
 
     /// @dev Initialize constructor parameters
     /// @param _boardVerifier verifier contract for board creation proof to start or join
@@ -64,9 +65,9 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     /// The user creates game and sets bet amount.
     /// Emits as {GameCreated} event
     function createGame(bytes calldata _proof, uint256 _boardHash, uint128 _betAmount)
-        external
-        payable
-        returns (uint32)
+    external
+    payable
+    returns (uint32)
     {
         if (_betAmount < MIN_BET_AMOUNT) revert IncorrectBetAmount();
 
@@ -135,7 +136,7 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     /// User has only 1 minute to make a move otherwise technical lose will appear
     /// Emits as {MoveSubmitted} event and {GameFinished} event
     function submitMove(uint32 _gameID, uint8 _moveX, uint8 _moveY, bytes calldata _proof, bool isPreviousMoveAHit)
-        external
+    external
     {
         if (_gameID >= nextGameID) revert InvalidGameID();
 
@@ -159,6 +160,9 @@ contract BunnyBattle is Ownable, IBunnyBattle {
 
         if (_moveX >= 3) revert InvalidMoveX();
         if (_moveY >= 3) revert InvalidMoveY();
+
+        bool moveDuplicate = movesCoordinates[_gameID][msg.sender][_moveX][_moveY];
+        if (moveDuplicate) revert InvalidMoveDuplicate();
 
         uint8 playerTotalHits = totalHits[_gameID][msg.sender];
 
@@ -188,6 +192,7 @@ contract BunnyBattle is Ownable, IBunnyBattle {
         unchecked {
             g.movesSize = movesSize + 1;
             g.nextMoveDeadline = block.timestamp + MAKE_MOVE_TIMESTAMP;
+            movesCoordinates[_gameID][msg.sender][_moveX][_moveY] = true;
         }
 
         games[_gameID] = g;
@@ -268,8 +273,8 @@ contract BunnyBattle is Ownable, IBunnyBattle {
         uint256[8] memory p = abi.decode(_proof, (uint256[8]));
         if (
             !moveVerifier.verifyProof(
-                [p[0], p[1]], [[p[2], p[3]], [p[4], p[5]]], [p[6], p[7]], [isHit ? 1 : 0, _boardHash, x, y]
-            )
+            [p[0], p[1]], [[p[2], p[3]], [p[4], p[5]]], [p[6], p[7]], [isHit ? 1 : 0, _boardHash, x, y]
+        )
         ) revert InvalidMoveZK();
     }
 
@@ -278,9 +283,9 @@ contract BunnyBattle is Ownable, IBunnyBattle {
     }
 
     function _calculateReward(uint128 totalBetAmount)
-        internal
-        pure
-        returns (uint128 winnerReward, uint128 treasuryFee)
+    internal
+    pure
+    returns (uint128 winnerReward, uint128 treasuryFee)
     {
         treasuryFee = totalBetAmount * FEE_PERCENTAGE / BPS;
         winnerReward = totalBetAmount - treasuryFee;
